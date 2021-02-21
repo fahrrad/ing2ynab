@@ -15,13 +15,13 @@
       (t/is (= ynab-line result)))))
 
 (t/deftest convert-date-test
-  (t/testing "convert date in german format to US"
+  (t/testing "convert date in German format to US"
     (t/is (= "02/18/2021" (sut/convert-date "18.02.2021")))))
 
 (t/deftest parse-number-test
   (t/testing "to work around a bug in ynab, add 1 cent to round numbers"
     (t/is (= 10.01M (sut/parse-number "10,00")))
     (t/is (= -10.01M (sut/parse-number "-10,00"))))
-  (t/testing "convert number in German format to US"
+  (t/testing "Parse numbers in German format"
     (t/is (= 45.54M (sut/parse-number "45,54")))
     (t/is (= -45.54M (sut/parse-number "-45,54")))))
