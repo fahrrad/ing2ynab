@@ -18,15 +18,16 @@
         parsed-date (LocalDate/parse s in-formatter)]
     (.format parsed-date out-formatter)))
 
-(defn parse-number [s]
+(def parse-number
   (let [parser (doto
                 (NumberFormat/getNumberInstance (Locale/GERMAN))
-                 (.setParseBigDecimal true))
-        parsed-number (.parse parser s)
-        fract-part (.remainder parsed-number BigDecimal/ONE)]
-    (if (= fract-part 0M)
-      ((if (pos? (.signum parsed-number)) + -) parsed-number 0.01M)
-      parsed-number)))
+                 (.setParseBigDecimal true))]
+    (fn [s]
+      (let [parsed-number (.parse parser s)
+            is-int? (= 0M (.remainder parsed-number BigDecimal/ONE))]
+        (if is-int?
+          ((if (pos? parsed-number) + -) parsed-number 0.01M)
+          parsed-number)))))
 
 (defn parse-line [l]
   (let [outflow-fn (fn [l] (let [v (parse-number (nth l 8))] (if (< v 0M) (.abs v) 0M)))
