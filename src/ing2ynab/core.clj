@@ -9,8 +9,21 @@
 ;; Converts ING export files with this format:
 ;; Buchung;Valuta;Auftraggeber/Empfänger;Buchungstext;Kategorie;Verwendungszweck;Saldo;Währung;Betrag;Währung
 ;; 
+;; Om een of andere klote reden zijn uitreksels van onze gemeenschappelijke rekening anders geformateerd: de ;Katergorie kolom ontbreekt
+;; 
+;; Buchung;Valuta;Auftraggeber/Empfänger;Buchungstext;Verwendungszweck;Saldo;Währung;Betrag;Währung
+;; 
 ;; To YNAB input files with this format
 ;; DATE,PAYEE,MEMO,OUTFLOW,INFLOW
+;; 
+
+(defn
+  parse-csv
+  "read semi-comma separaterd "
+  [ls]
+  (let [header (map keyword (s/split (first ls) #";"))]
+    (map (fn [l] (zipmap header (s/split l #";"))) 
+         (rest ls))))
 
 (defn convert-date [s]
   (let [in-formatter (DateTimeFormatter/ofPattern  "dd.MM.yyyy")
