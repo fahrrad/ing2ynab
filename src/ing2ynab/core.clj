@@ -17,13 +17,7 @@
 ;; DATE,PAYEE,MEMO,OUTFLOW,INFLOW
 ;; 
 
-(defn
-  parse-csv
-  "read semi-comma separaterd "
-  [ls]
-  (let [header (map keyword (s/split (first ls) #";"))]
-    (map (fn [l] (zipmap header (s/split l #";"))) 
-         (rest ls))))
+(def ^:dynamic *header* "")
 
 (defn convert-date [s]
   (let [in-formatter (DateTimeFormatter/ofPattern  "dd.MM.yyyy")
@@ -43,14 +37,15 @@
           parsed-number)))))
 
 (defn parse-line [l]
-  (let [outflow-fn (fn [l] (let [v (parse-number (nth l 8))] (if (< v 0M) (.abs v) 0M)))
-        inflow-fn (fn [l] (let [v (parse-number (nth l 8))] (if (> v 0M) (.abs v) 0M)))
-        f (juxt (fn [l] (convert-date (nth l 1))) ;; DATE
-                (fn [l] (str "\"" (nth l 2) "\"")) ;; PAYEE
-                (fn [l] (str "\"" (nth l 5) "\"")) ;; MEMO
+  (let [outflow-fn (fn [l] (let [v (parse-number (:Betrag l))] (if (< v 0M) (.abs v) 0M)))
+        inflow-fn (fn [l] (let [v (parse-number (:Betrag l))] (if (> v 0M) (.abs v) 0M)))
+        l (zipmap *header* (s/split l #";"))
+        f (juxt (fn [l] (convert-date (:Valuta l))) ;; DATE
+                (fn [l] (str "\"" (:Auftraggeber/Empfänger l) "\"")) ;; PAYEE
+                (fn [l] (str "\"" (:Verwendungszweck l) "\"")) ;; MEMO
                 outflow-fn ;; OUTFLOW
                 inflow-fn)] ;; INFLOW
-    (-> l (s/split #";") f (as-> a (s/join "," a)))))
+    (s/join "," (f l))))
 
 (defn read-transform-print-loop []
   (let [i (read-line)]
@@ -65,4 +60,5 @@
    iconv -f ISO8859-3 -t UTF8 < resources/ing.csv | tail -n +16 | java -jar target/uberjar/ing2ynab-0.1.0-SNAPSHOT-standalone.jar "
   [& args]
   (println "DATE,PAYEE,MEMO,OUTFLOW,INFLOW")
-  (read-transform-print-loop))
+  (binding  [*header* (map keyword (s/split (read-line) #";"))]
+    (read-transform-print-loop)))

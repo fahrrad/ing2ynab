@@ -26,12 +26,5 @@
     (t/is (= 45.54M (sut/parse-number "45,54")))
     (t/is (= -45.54M (sut/parse-number "-45,54")))))
 
-(t/deftest parse-csv-test
-  (let [test-csv ["h1;h2;h3" "1;2;3" "2;4;6"]]
-    (t/testing "getting a list of maps"
-      (let [result (sut/parse-csv test-csv)]
-        (t/is (= '({:h1 "1" :h2 "2" :h3 "3"}
-                   {:h1 "2" :h2 "4" :h3 "6"}) result))))))
-
 (comment 
   (seq? [:a]))
