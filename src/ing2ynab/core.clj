@@ -37,6 +37,7 @@
           parsed-number)))))
 
 (defn parse-line [l]
+  (println *headers*)
   (let [outflow-fn (fn [l] (let [v (parse-number (:Betrag l))] (if (< v 0M) (.abs v) 0M)))
         inflow-fn (fn [l] (let [v (parse-number (:Betrag l))] (if (> v 0M) (.abs v) 0M)))
         l (zipmap *header* (s/split l #";"))
